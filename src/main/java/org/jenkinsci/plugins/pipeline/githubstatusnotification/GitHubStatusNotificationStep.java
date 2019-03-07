@@ -115,10 +115,6 @@ public final class GitHubStatusNotificationStep extends AbstractStepImpl {
      */
     private String credentialsId;
     /**
-     * The GitHub's account that owns the repo to notify
-     */
-    private String account;
-    /**
      * The target URL to associate with the sendstatus.
      *
      * This URL will be linked from the GitHub UI to allow users to easily see the 'source' of the Status.
@@ -165,11 +161,6 @@ public final class GitHubStatusNotificationStep extends AbstractStepImpl {
     }
 
     @DataBoundSetter
-    public void setAccount(String account) {
-        this.account = account;
-    }
-
-    @DataBoundSetter
     public void setCredentialsId(String credentialsId) {
         this.credentialsId = Util.fixEmpty(credentialsId);
     }
@@ -200,10 +191,6 @@ public final class GitHubStatusNotificationStep extends AbstractStepImpl {
 
     public String getCredentialsId() {
         return this.credentialsId;
-    }
-
-    public String getAccount() {
-        return this.account;
     }
 
     public String getTargetUrl() {
@@ -264,17 +251,17 @@ public final class GitHubStatusNotificationStep extends AbstractStepImpl {
         }
     }
 
-    private static GHRepository getRepoIfValid(String credentialsId, String gitApiUrl, String account, String repo, Item context) throws IOException {
+    private static GHRepository getRepoIfValid(String credentialsId, String gitApiUrl, String repo, Item context) throws IOException {
         GitHub github = getGitHubIfValid(credentialsId, gitApiUrl, context);
-        GHRepository repository = github.getUser(account).getRepository(repo);
+        GHRepository repository = github.getMyself().getRepository(repo);
         if (repository == null) {
             throw new IllegalArgumentException(INVALID_REPO);
         }
         return repository;
     }
 
-    private static GHCommit getCommitIfValid(String credentialsId, String gitApiUrl, String account, String repo, String sha, Item context) throws IOException {
-        GHRepository repository = getRepoIfValid(credentialsId, gitApiUrl, account, repo, context);
+    private static GHCommit getCommitIfValid(String credentialsId, String gitApiUrl, String repo, String sha, Item context) throws IOException {
+        GHRepository repository = getRepoIfValid(credentialsId, gitApiUrl, repo, context);
         GHCommit commit = repository.getCommit(sha);
         if (commit == null) {
             throw new IllegalArgumentException(INVALID_COMMIT);
@@ -331,9 +318,9 @@ public final class GitHubStatusNotificationStep extends AbstractStepImpl {
         }
 
         public FormValidation doCheckRepo(@QueryParameter ("credentialsId") final String credentialsId,
-                                          @QueryParameter ("repo") final String repo, @QueryParameter ("account") final String account, @QueryParameter ("gitApiUrl") final String gitApiUrl, @AncestorInPath Item context) {
+                                          @QueryParameter ("repo") final String repo, @QueryParameter ("gitApiUrl") final String gitApiUrl, @AncestorInPath Item context) {
             try {
-                getRepoIfValid(credentialsId, gitApiUrl, account, repo, context);
+                getRepoIfValid(credentialsId, gitApiUrl, repo, context);
                 return FormValidation.ok("Success");
             } catch (Exception e) {
                 return FormValidation.error(e.getMessage());
@@ -341,9 +328,9 @@ public final class GitHubStatusNotificationStep extends AbstractStepImpl {
         }
 
         public FormValidation doCheckSha(@QueryParameter ("credentialsId") final String credentialsId, @QueryParameter ("repo") final String repo,
-                                         @QueryParameter ("sha") final String sha, @QueryParameter ("account") final String account, @QueryParameter ("gitApiUrl") final String gitApiUrl, @AncestorInPath Item context) {
+                                         @QueryParameter ("sha") final String sha, @QueryParameter ("gitApiUrl") final String gitApiUrl, @AncestorInPath Item context) {
             try {
-                getCommitIfValid(credentialsId, gitApiUrl, account, repo, sha, context);
+                getCommitIfValid(credentialsId, gitApiUrl, repo, sha, context);
                 return FormValidation.ok("Commit seems valid");
 
             } catch (Exception e) {
@@ -354,7 +341,7 @@ public final class GitHubStatusNotificationStep extends AbstractStepImpl {
 
     public static final class Execution extends AbstractSynchronousNonBlockingStepExecution<Void> {
 
-        public static final String UNABLE_TO_INFER_DATA = "Unable to infer git data, please specify repo, credentialsId, account and sha values";
+        public static final String UNABLE_TO_INFER_DATA = "Unable to infer git data, please specify repo, credentialsId and sha values";
         public static final String UNABLE_TO_INFER_COMMIT = "Could not infer exact commit to use, please specify one";
         public static final String UNABLE_TO_INFER_CREDENTIALS_ID = "Can not infer exact credentialsId to use, please specify one";
 
@@ -369,8 +356,7 @@ public final class GitHubStatusNotificationStep extends AbstractStepImpl {
             String targetUrl = getTargetUrl();
             String credentialsId = getCredentialsId();
             String repo = getRepo();
-            String account = getAccount();
-            GHRepository repository = getRepoIfValid(credentialsId, step.getGitApiUrl(), account, repo, run.getParent());
+            GHRepository repository = getRepoIfValid(credentialsId, step.getGitApiUrl(), repo, run.getParent());
             String sha1 = getSha1();
             GHCommit commit = null;
             try {
@@ -421,14 +407,6 @@ public final class GitHubStatusNotificationStep extends AbstractStepImpl {
             }
         }
 
-        private String getAccount() {
-            if (step.getAccount() == null || step.getAccount().isEmpty()) {
-                return tryToInferAccount();
-            } else {
-                return step.getAccount();
-            }
-        }
-
         private String getSha1() {
             if (step.getSha() == null || step.getSha().isEmpty()) {
                 return tryToInferSha();
@@ -448,10 +426,6 @@ public final class GitHubStatusNotificationStep extends AbstractStepImpl {
 
         private String tryToInferRepo() {
             return getSource().getRepository();
-        }
-
-        private String tryToInferAccount() {
-            return getSource().getRepoOwner();
         }
 
         private String tryToInferSha() {
