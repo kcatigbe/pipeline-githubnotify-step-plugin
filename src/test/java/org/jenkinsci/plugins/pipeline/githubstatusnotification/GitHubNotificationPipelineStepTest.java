@@ -25,6 +25,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.IOException;
 import java.net.Proxy;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.mockito.Matchers.anyString;
 
@@ -112,9 +115,8 @@ public class GitHubNotificationPipelineStepTest {
         PowerMockito.when(ghb.build()).thenReturn(gh);
         PowerMockito.when(gh.isCredentialValid()).thenReturn(true);
         GHMyself myself = PowerMockito.mock(GHMyself.class);
-        PowerMockito.when(myself.getRepository(anyString())).thenReturn(null);
         PowerMockito.when(gh.getMyself()).thenReturn(myself);
-
+        PowerMockito.when(myself.getAllRepositories()).thenReturn(Collections.emptyMap());
 
         Credentials dummy = new DummyCredentials(CredentialsScope.GLOBAL, "user", "password");
         SystemCredentialsProvider.getInstance().getCredentials().add(dummy);
@@ -141,10 +143,14 @@ public class GitHubNotificationPipelineStepTest {
         GitHub gh = PowerMockito.mock(GitHub.class);
         PowerMockito.when(ghb.build()).thenReturn(gh);
         PowerMockito.when(gh.isCredentialValid()).thenReturn(true);
-        GHRepository repo = PowerMockito.mock(GHRepository.class);
+
         GHMyself myself = PowerMockito.mock(GHMyself.class);
-        PowerMockito.when(myself.getRepository(anyString())).thenReturn(repo);
+
+        PowerMockito.when(myself.getAllRepositories()).thenReturn(getRepoMap());
         PowerMockito.when(gh.getMyself()).thenReturn(myself);
+
+        GHRepository repo = myself.getAllRepositories().get("acceptance-test-harness");
+
         PowerMockito.when((repo.getCommit(anyString()))).thenThrow(IOException.class);
 
         Credentials dummy = new DummyCredentials(CredentialsScope.GLOBAL, "user", "password");
@@ -172,10 +178,11 @@ public class GitHubNotificationPipelineStepTest {
         GitHub gh = PowerMockito.mock(GitHub.class);
         PowerMockito.when(ghb.build()).thenReturn(gh);
         PowerMockito.when(gh.isCredentialValid()).thenReturn(true);
-        GHRepository repo = PowerMockito.mock(GHRepository.class);
+        
         GHMyself myself = PowerMockito.mock(GHMyself.class);
-        PowerMockito.when(myself.getRepository(anyString())).thenReturn(repo);
+        PowerMockito.when(myself.getAllRepositories()).thenReturn(getRepoMap());
         PowerMockito.when(gh.getMyself()).thenReturn(myself);
+        GHRepository repo = myself.getAllRepositories().get("acceptance-test-harness");
         PowerMockito.when((repo.getCommit(anyString()))).thenReturn(null);
 
         Credentials dummy = new DummyCredentials(CredentialsScope.GLOBAL, "user", "password");
@@ -203,10 +210,11 @@ public class GitHubNotificationPipelineStepTest {
         GitHub gh = PowerMockito.mock(GitHub.class);
         PowerMockito.when(ghb.build()).thenReturn(gh);
         PowerMockito.when(gh.isCredentialValid()).thenReturn(true);
-        GHRepository repo = PowerMockito.mock(GHRepository.class);
+        
         GHMyself myself = PowerMockito.mock(GHMyself.class);
-        PowerMockito.when(myself.getRepository(anyString())).thenReturn(repo);
+        PowerMockito.when(myself.getAllRepositories()).thenReturn(getRepoMap());
         PowerMockito.when(gh.getMyself()).thenReturn(myself);
+        GHRepository repo = myself.getAllRepositories().get("acceptance-test-harness");
         PowerMockito.when((repo.getCommit(anyString()))).thenReturn(null);
 
         Credentials dummy = new DummyCredentials(CredentialsScope.GLOBAL, "user", "password");
@@ -233,10 +241,11 @@ public class GitHubNotificationPipelineStepTest {
         GitHub gh = PowerMockito.mock(GitHub.class);
         PowerMockito.when(ghb.build()).thenReturn(gh);
         PowerMockito.when(gh.isCredentialValid()).thenReturn(true);
-        GHRepository repo = PowerMockito.mock(GHRepository.class);
+        
         GHMyself myself = PowerMockito.mock(GHMyself.class);
-        PowerMockito.when(myself.getRepository(anyString())).thenReturn(repo);
+        PowerMockito.when(myself.getAllRepositories()).thenReturn(getRepoMap());
         PowerMockito.when(gh.getMyself()).thenReturn(myself);
+        GHRepository repo = myself.getAllRepositories().get("acceptance-test-harness");
         PowerMockito.when((repo.getCommit(anyString()))).thenReturn(null);
 
         Credentials dummy = new DummyCredentials(CredentialsScope.GLOBAL, "user", "password");
@@ -263,11 +272,12 @@ public class GitHubNotificationPipelineStepTest {
         GitHub gh = PowerMockito.mock(GitHub.class);
         PowerMockito.when(ghb.build()).thenReturn(gh);
         PowerMockito.when(gh.isCredentialValid()).thenReturn(true);
-        GHRepository repo = PowerMockito.mock(GHRepository.class);
+        
         GHMyself myself = PowerMockito.mock(GHMyself.class);
         GHCommit commit = PowerMockito.mock(GHCommit.class);
-        PowerMockito.when(myself.getRepository(anyString())).thenReturn(repo);
+        PowerMockito.when(myself.getAllRepositories()).thenReturn(getRepoMap());
         PowerMockito.when(gh.getMyself()).thenReturn(myself);
+        GHRepository repo = myself.getAllRepositories().get("acceptance-test-harness");
         PowerMockito.when((repo.getCommit(anyString()))).thenReturn(commit);
 
         Credentials dummy = new DummyCredentials(CredentialsScope.GLOBAL, "user", "password");
@@ -294,11 +304,12 @@ public class GitHubNotificationPipelineStepTest {
         GitHub gh = PowerMockito.mock(GitHub.class);
         PowerMockito.when(ghb.build()).thenReturn(gh);
         PowerMockito.when(gh.isCredentialValid()).thenReturn(true);
-        GHRepository repo = PowerMockito.mock(GHRepository.class);
+        
         GHMyself myself = PowerMockito.mock(GHMyself.class);
         GHCommit commit = PowerMockito.mock(GHCommit.class);
-        PowerMockito.when(myself.getRepository(anyString())).thenReturn(repo);
+        PowerMockito.when(myself.getAllRepositories()).thenReturn(getRepoMap());
         PowerMockito.when(gh.getMyself()).thenReturn(myself);
+        GHRepository repo = myself.getAllRepositories().get("acceptance-test-harness");
         PowerMockito.when((repo.getCommit(anyString()))).thenReturn(commit);
 
         Folder f = jenkins.jenkins.createProject(Folder.class, "folder" + jenkins.jenkins.getItems().size());
@@ -328,11 +339,12 @@ public class GitHubNotificationPipelineStepTest {
         GitHub gh = PowerMockito.mock(GitHub.class);
         PowerMockito.when(ghb.build()).thenReturn(gh);
         PowerMockito.when(gh.isCredentialValid()).thenReturn(true);
-        GHRepository repo = PowerMockito.mock(GHRepository.class);
+        
         GHMyself myself = PowerMockito.mock(GHMyself.class);
         GHCommit commit = PowerMockito.mock(GHCommit.class);
-        PowerMockito.when(myself.getRepository(anyString())).thenReturn(repo);
+        PowerMockito.when(myself.getAllRepositories()).thenReturn(getRepoMap());
         PowerMockito.when(gh.getMyself()).thenReturn(myself);
+        GHRepository repo = myself.getAllRepositories().get("acceptance-test-harness");
         PowerMockito.when((repo.getCommit(anyString()))).thenReturn(commit);
 
         Credentials dummy = new DummyCredentials(CredentialsScope.GLOBAL, "user", "password");
@@ -361,5 +373,11 @@ public class GitHubNotificationPipelineStepTest {
         return folderStore;
     }
 
+    private Map<String, GHRepository> getRepoMap() {
+        GHRepository repo = PowerMockito.mock(GHRepository.class);
+        return new HashMap<String, GHRepository>() {{
+            put("acceptance-test-harness", repo);
+        }};
+    }
 
 }

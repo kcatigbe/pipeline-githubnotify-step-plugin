@@ -68,6 +68,7 @@ import java.io.IOException;
 import java.net.Proxy;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
 
@@ -253,7 +254,9 @@ public final class GitHubStatusNotificationStep extends AbstractStepImpl {
 
     private static GHRepository getRepoIfValid(String credentialsId, String gitApiUrl, String repo, Item context) throws IOException {
         GitHub github = getGitHubIfValid(credentialsId, gitApiUrl, context);
-        GHRepository repository = github.getMyself().getRepository(repo);
+
+        GHRepository repository = github.getMyself().getAllRepositories().get(repo);
+
         if (repository == null) {
             throw new IllegalArgumentException(INVALID_REPO);
         }
