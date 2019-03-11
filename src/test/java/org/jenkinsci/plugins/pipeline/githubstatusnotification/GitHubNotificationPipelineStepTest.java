@@ -2,11 +2,7 @@ package org.jenkinsci.plugins.pipeline.githubstatusnotification;
 
 import com.cloudbees.hudson.plugins.folder.Folder;
 import com.cloudbees.hudson.plugins.folder.properties.FolderCredentialsProvider;
-import com.cloudbees.plugins.credentials.Credentials;
-import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.cloudbees.plugins.credentials.CredentialsScope;
-import com.cloudbees.plugins.credentials.CredentialsStore;
-import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
+import com.cloudbees.plugins.credentials.*;
 import com.cloudbees.plugins.credentials.domains.Domain;
 import hudson.model.Result;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
@@ -31,9 +27,9 @@ import java.util.Map;
 
 import static org.mockito.Matchers.anyString;
 
-@RunWith (PowerMockRunner.class)
-@PrepareForTest ({GitHubStatusNotificationStep.class})
-@PowerMockIgnore ({"javax.crypto.*" })
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({GitHubStatusNotificationStep.class})
+@PowerMockIgnore({"javax.crypto.*"})
 public class GitHubNotificationPipelineStepTest {
 
     @Rule
@@ -56,17 +52,17 @@ public class GitHubNotificationPipelineStepTest {
 
     @Test
     public void buildWithNotExistingCredentialsMustFail() throws Exception {
-                        WorkflowJob p = jenkins.createProject(WorkflowJob.class, "p");
-                p.setDefinition(new CpsFlowDefinition(
-                        "githubNotify context: 'ATH Results', " +
-                                "credentialsId: 'notExisting', description: 'All tests are OK', " +
-                                "repo: 'acceptance-test-harness', sha: '0b5936eb903d439ac0c0bf84940d73128d5e9487', " +
-                                "status: 'SUCCESS', targetUrl: 'http://www.cloudbees.com'"
-                ));
-                WorkflowRun b1 = p.scheduleBuild2(0).waitForStart();
-                jenkins.assertBuildStatus(Result.FAILURE, jenkins.waitForCompletion(b1));
-                jenkins.assertLogContains(GitHubStatusNotificationStep.CREDENTIALS_ID_NOT_EXISTS, b1);
-            }
+        WorkflowJob p = jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "githubNotify context: 'ATH Results', " +
+                        "credentialsId: 'notExisting', description: 'All tests are OK', " +
+                        "repo: 'acceptance-test-harness', sha: '0b5936eb903d439ac0c0bf84940d73128d5e9487', " +
+                        "status: 'SUCCESS', targetUrl: 'http://www.cloudbees.com'"
+        ));
+        WorkflowRun b1 = p.scheduleBuild2(0).waitForStart();
+        jenkins.assertBuildStatus(Result.FAILURE, jenkins.waitForCompletion(b1));
+        jenkins.assertLogContains(GitHubStatusNotificationStep.CREDENTIALS_NOT_FOUND, b1);
+    }
 
     @Test
     public void buildWithWrongCredentialsMustFail() throws Exception {
@@ -76,14 +72,14 @@ public class GitHubNotificationPipelineStepTest {
 
         WorkflowJob p = jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-        "githubNotify context: 'ATH Results', " +
-        "credentialsId: 'dummy', description: 'All tests are OK', " +
-        "repo: 'acceptance-test-harness', sha: '0b5936eb903d439ac0c0bf84940d73128d5e9487', " +
-        "status: 'SUCCESS', targetUrl: 'http://www.cloudbees.com'"
+                "githubNotify context: 'ATH Results', " +
+                        "credentialsId: 'dummy', description: 'All tests are OK', " +
+                        "repo: 'acceptance-test-harness', sha: '0b5936eb903d439ac0c0bf84940d73128d5e9487', " +
+                        "status: 'SUCCESS', targetUrl: 'http://www.cloudbees.com'"
         ));
         WorkflowRun b1 = p.scheduleBuild2(0).waitForStart();
         jenkins.assertBuildStatus(Result.FAILURE, jenkins.waitForCompletion(b1));
-        jenkins.assertLogContains(GitHubStatusNotificationStep.CREDENTIALS_LOGIN_INVALID, b1);
+        jenkins.assertLogContains(GitHubStatusNotificationStep.CREDENTIALS_INVALID, b1);
     }
 
     @Test
@@ -101,7 +97,7 @@ public class GitHubNotificationPipelineStepTest {
         ));
         WorkflowRun b1 = p.scheduleBuild2(0).waitForStart();
         jenkins.assertBuildStatus(Result.FAILURE, jenkins.waitForCompletion(b1));
-        jenkins.assertLogContains(GitHubStatusNotificationStep.CREDENTIALS_LOGIN_INVALID, b1);
+        jenkins.assertLogContains(GitHubStatusNotificationStep.CREDENTIALS_INVALID, b1);
     }
 
     @Test
@@ -178,7 +174,7 @@ public class GitHubNotificationPipelineStepTest {
         GitHub gh = PowerMockito.mock(GitHub.class);
         PowerMockito.when(ghb.build()).thenReturn(gh);
         PowerMockito.when(gh.isCredentialValid()).thenReturn(true);
-        
+
         GHMyself myself = PowerMockito.mock(GHMyself.class);
         PowerMockito.when(myself.getAllRepositories()).thenReturn(getRepoMap());
         PowerMockito.when(gh.getMyself()).thenReturn(myself);
@@ -210,7 +206,7 @@ public class GitHubNotificationPipelineStepTest {
         GitHub gh = PowerMockito.mock(GitHub.class);
         PowerMockito.when(ghb.build()).thenReturn(gh);
         PowerMockito.when(gh.isCredentialValid()).thenReturn(true);
-        
+
         GHMyself myself = PowerMockito.mock(GHMyself.class);
         PowerMockito.when(myself.getAllRepositories()).thenReturn(getRepoMap());
         PowerMockito.when(gh.getMyself()).thenReturn(myself);
@@ -241,7 +237,7 @@ public class GitHubNotificationPipelineStepTest {
         GitHub gh = PowerMockito.mock(GitHub.class);
         PowerMockito.when(ghb.build()).thenReturn(gh);
         PowerMockito.when(gh.isCredentialValid()).thenReturn(true);
-        
+
         GHMyself myself = PowerMockito.mock(GHMyself.class);
         PowerMockito.when(myself.getAllRepositories()).thenReturn(getRepoMap());
         PowerMockito.when(gh.getMyself()).thenReturn(myself);
@@ -272,7 +268,7 @@ public class GitHubNotificationPipelineStepTest {
         GitHub gh = PowerMockito.mock(GitHub.class);
         PowerMockito.when(ghb.build()).thenReturn(gh);
         PowerMockito.when(gh.isCredentialValid()).thenReturn(true);
-        
+
         GHMyself myself = PowerMockito.mock(GHMyself.class);
         GHCommit commit = PowerMockito.mock(GHCommit.class);
         PowerMockito.when(myself.getAllRepositories()).thenReturn(getRepoMap());
@@ -304,7 +300,7 @@ public class GitHubNotificationPipelineStepTest {
         GitHub gh = PowerMockito.mock(GitHub.class);
         PowerMockito.when(ghb.build()).thenReturn(gh);
         PowerMockito.when(gh.isCredentialValid()).thenReturn(true);
-        
+
         GHMyself myself = PowerMockito.mock(GHMyself.class);
         GHCommit commit = PowerMockito.mock(GHCommit.class);
         PowerMockito.when(myself.getAllRepositories()).thenReturn(getRepoMap());
@@ -339,7 +335,7 @@ public class GitHubNotificationPipelineStepTest {
         GitHub gh = PowerMockito.mock(GitHub.class);
         PowerMockito.when(ghb.build()).thenReturn(gh);
         PowerMockito.when(gh.isCredentialValid()).thenReturn(true);
-        
+
         GHMyself myself = PowerMockito.mock(GHMyself.class);
         GHCommit commit = PowerMockito.mock(GHCommit.class);
         PowerMockito.when(myself.getAllRepositories()).thenReturn(getRepoMap());
