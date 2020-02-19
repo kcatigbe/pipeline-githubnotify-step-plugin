@@ -26,9 +26,6 @@ THE SOFTWARE.
     <f:validateButton
            title="${%testConnection}" progress="${%testing}"
            method="testConnection" with="credentialsId" />
-    <f:entry field="account" title="${%gitHubAccount}">
-        <f:textbox />
-    </f:entry>
     <f:entry field="repo" title="${%repository}">
         <f:textbox />
     </f:entry>
